@@ -58,22 +58,42 @@ ORDER BY
 
 /*
  * 3. Cuales son las habilidades mas demandas en analisis de datos.
- * -
  */
 
-
-SELECT
-	sd.skills,
-	COUNT(sjd.job_id) AS demand_count
+WITH skills_ids AS (
+SELECT skill_id
+FROM skills_job_dim sjd
+WHERE job_id IN (
+	SELECT jpf.job_id 
+	FROM job_postings_fact jpf 
+	WHERE jpf.job_title_short = 'Data Analyst'
+)
+)
+SELECT 
+	sd.skills, 
+	COUNT(sd.skill_id) AS demand_count
 FROM 
-	job_postings_fact jpf 
-INNER JOIN skills_job_dim sjd ON jpf.job_id = sjd.job_id 
-INNER JOIN skills_dim sd ON sjd.skill_id = sd.skill_id 
-WHERE 
-	jpf.job_title_short = 'Data Analyst' AND 
-	(jpf.job_country = 'Mexico' OR jpf.job_work_from_home = 1)
+	skills_ids si
+INNER JOIN skills_dim sd ON si.skill_id = sd.skill_id
 GROUP BY 
-	sd.skills 
+	sd.skills
 ORDER BY 
 	demand_count DESC
 LIMIT 5;
+
+/*
+ * 4. Como se compara el analisis de datos frente a otros trabajos relacionados con datos?
+ * - Filtramos los trabajos que tienen que ver con datos
+ * - Contamos la cantidad de trabajos que ofrece cada rol
+ */
+SELECT 
+	job_title_short,
+	COUNT(job_title) AS job_count,
+	ROUND(AVG(salary_year_avg)) AS salary_avg
+FROM 
+	job_postings_fact jpf
+WHERE 
+	salary_year_avg IS NOT NULL AND 
+	job_title_short LIKE '%Data%'
+GROUP BY
+	job_title_short;

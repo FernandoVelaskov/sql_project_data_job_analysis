@@ -168,3 +168,11 @@ HAVING COUNT(*) > 1;
  * 
  * Se busca descartar datos no relevantes para nuestro analisis, entonces se presinde de columnas como link, link_google y thumbnail de la tabla 
  */
+ALTER TABLE company_dim
+DROP COLUMN thumbnail;
+
+ALTER TABLE company_dim 
+DROP COLUMN link_google;
+
+ALTER TABLE company_dim 
+DROP COLUMN link;
